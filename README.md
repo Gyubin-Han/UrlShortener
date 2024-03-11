@@ -1,1 +1,12 @@
 # Url Shortener
+- 목표 : 긴 원본 URL을 짧고 기억하기 쉬운 영단어로 변환해주는 웹 서비스 구현
+- 개발 기간 : 2023. 03. 06. ~ 03. 08.
+- 주요 기능
+  - URL Shortener (URL 단축)
+- 사용 기술
+  - Front-End : JSP, JavaScript, jQuery
+  - Back-End : Spring Framework (Spring Boot), MyBatis
+- 구축 환경
+  - DBMS : MariaDB
+  - Server : Ubuntu 20.04 LTS
+- 실제 서비스 URL : https://sh.gyu.be/
