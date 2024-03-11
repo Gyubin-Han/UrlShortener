@@ -1,0 +1,30 @@
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="be.gyu.url_shortener.dao.UrlShortenerDAO">
+  <!-- 줄인 단어 URL을 조회 -->
+  <select id="goUrlShortWord">
+    <![CDATA[
+      SELECT original_url FROM url_short_map WHERE word=#{word};
+    ]]>
+  </select>
+  <!-- 현재 단어 URL로 사용 가능한 단어 3개를 조회 -->
+  <!-- (단어는 현재 원 URL(original_url)이 NULL인 단어 중에서만 선택 가능) -->
+  <select id="getAvailableShortWords">
+    <![CDATA[
+      SELECT word FROM url_short_map
+        WHERE original_url IS NULL
+        ORDER BY RAND() LIMIT 3;
+    ]]>
+  </select>
+
+  <!-- 사용자가 선택한 단어를  DB에 반영 -->
+  <!-- (선택한 단어에 원 URL을 반영하여 저장) -->
+  <update id="setUrlShortWord">
+    <![CDATA[
+      UPDATE url_short_map SET original_url=#{originalUrl}
+        WHERE word=#{word};
+    ]]>
+  </update>
+</mapper>
