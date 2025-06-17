@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import be.gyu.urlShortener.entity.UrlMap;
+import be.gyu.urlShortener.exception.ShortUrlNotFoundException;
 import be.gyu.urlShortener.repository.UrlMapRepository;
 
+import java.util.Optional;
 import java.time.LocalDateTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -78,5 +80,16 @@ public class MainService {
 
         // 단축된 URL 반환
         return shortResult;
+    }
+
+    // 단축 URL로 원본 URL 조회 및 반환 메소드
+    public String getOriginalUrl(String shortUrl){
+        Optional<UrlMap> optional=urlMapRepository.findByUrlMapShort(shortUrl);
+        
+        if(!optional.isPresent()){
+            throw new ShortUrlNotFoundException();
+        }
+
+        return optional.get().getUrlMapOriginal();
     }
 }
