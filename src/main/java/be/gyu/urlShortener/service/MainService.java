@@ -5,8 +5,11 @@ import org.springframework.stereotype.Service;
 
 import be.gyu.urlShortener.entity.UrlMap;
 import be.gyu.urlShortener.exception.ShortUrlNotFoundException;
+import be.gyu.urlShortener.exception.UrlValidationFailedException;
 import be.gyu.urlShortener.repository.UrlMapRepository;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.time.LocalDateTime;
 import java.security.MessageDigest;
@@ -91,5 +94,25 @@ public class MainService {
         }
 
         return optional.get().getUrlMapOriginal();
+    }
+
+    // 단축 URL 생성 메소드 (검증 및 생성)
+    public Map<String,String> generateShortUrl(String originalUrl){
+        Map<String,String> result=new HashMap<>();
+        
+        // 원본 URL 무결점 검증 (HTTP(S) URL이 맞는지 검증)
+        boolean isCorrectUrl=validOriginalUrl(originalUrl);
+        if(!isCorrectUrl){
+            // 올바른 HTTP(S) URL이 아닌 경우, 예외 발생
+            throw new UrlValidationFailedException();
+        }
+
+        // 단축 URL 생성
+        String shortUrl=createUrlShort(originalUrl);
+        result.put("status","success");
+        result.put("message","생성 성공");
+        result.put("shortUrl",shortUrl);
+
+        return result;
     }
 }
