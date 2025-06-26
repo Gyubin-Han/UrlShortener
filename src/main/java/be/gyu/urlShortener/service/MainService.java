@@ -33,7 +33,7 @@ public class MainService {
     }
 
     // URL 단축 메소드
-    public String createUrlShort(String url){
+    public UrlMap createUrlShort(String url){
         // SHA-256 Hashing을 위해 Instance 생성 및 호출
         MessageDigest md;
         try{
@@ -51,6 +51,7 @@ public class MainService {
             .urlMapClick(0l)
             .urlMapCreatedAt(LocalDateTime.now())
             .urlMapUpdatedAt(LocalDateTime.now())
+            .urlMapExpiredAt(LocalDateTime.now().plusDays(14))
             .build();
         
         // DB에 저장 - 초기 저장 (단축 URL은 빈 값으로 우선 저장)
@@ -76,13 +77,15 @@ public class MainService {
         urlMap=urlMap.toBuilder()
             .urlMapShort(shortResult)
             .build();
+
+        // TODO: 단축된 URL이 중복되는지 확인하는 검증 로직 필요 (중복 검증 로직)
         
         // 최종 저장 - 단축된 URL도 포함하여 저장
         // (기존 데이터에 Update하는 방법으로 저장)
         urlMapRepository.save(urlMap);
 
         // 단축된 URL 반환
-        return shortResult;
+        return urlMap;
     }
 
     // 단축 URL로 원본 URL 조회 및 반환 메소드
@@ -108,10 +111,12 @@ public class MainService {
         }
 
         // 단축 URL 생성
-        String shortUrl=createUrlShort(originalUrl);
+        UrlMap urlMap=createUrlShort(originalUrl);
         result.put("status","success");
         result.put("message","생성 성공");
-        result.put("shortUrl",shortUrl);
+        result.put("originalUrl",originalUrl);
+        result.put("shortUrl",urlMap.getUrlMapShort());
+        result.put("expiredAt",urlMap.getUrlMapExpiredAt().toString());
 
         return result;
     }
