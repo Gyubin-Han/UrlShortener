@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import be.gyu.urlShortener.service.MainService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,8 +56,13 @@ public class MainController {
      */
     @GetMapping("/{shortUrl}")
     public void getShortUrl(@PathVariable(name="shortUrl") String shortUrl, HttpServletResponse response){
+        // 단축 URL을 통해, 원본 URL을 가져옴.
         String originalUrl=mainService.getOriginalUrl(shortUrl);
+        // 가져온 원본 URL 값을 적잘한 URL이 될 수 있도록 Re-Direct하기 전에 URL-Encoding
+        String encodeUrl=UriComponentsBuilder.fromUriString(originalUrl).build().encode().toUriString();
+        // Re-Direct 상태 코드 설정
         response.setStatus(HttpStatus.MOVED_PERMANENTLY.value());
-        response.addHeader("Location",originalUrl);
+        // Re-Direct 목적지(원본 URL) 설정 및 Re-Direct 처리
+        response.setHeader("Location",encodeUrl);
     }
 }
