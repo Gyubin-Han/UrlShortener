@@ -54,6 +54,7 @@ node_modules/
 # OS specific
 .DS_Store
 # Task files
+.taskmaster
 tasks.json
 tasks/ 
 
@@ -66,3 +67,5 @@ scripts/
 .taskmasterconfig
 .windsurfrules
 compose.yaml
+
+js/
