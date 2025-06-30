@@ -143,9 +143,13 @@
         }
 
         // 단축 URL 생성 요청 및 처리
-        var queryUrl="/short?url="+inputUrl;
+        var queryUrl="/short"
         fetch(queryUrl,{
-            method: "POST"
+            method: "POST",
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ originalUrl : inputUrl })
         })
             .then(response => {
                 if(!response.ok){
