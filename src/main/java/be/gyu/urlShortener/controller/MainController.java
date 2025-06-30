@@ -9,9 +9,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import be.gyu.urlShortener.dto.GenerateShortUrlRequestDto;
 import be.gyu.urlShortener.service.MainService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,9 +39,9 @@ public class MainController {
      */
     @PostMapping("/short")
     @ResponseBody
-    public ResponseEntity<Map<String,String>> postGenerateShortUrl(HttpServletRequest request){
+    public ResponseEntity<Map<String,String>> postGenerateShortUrl(@RequestBody GenerateShortUrlRequestDto data, HttpServletRequest request){
         // 서비스 로직 메소드 호출
-        Map<String,String> resultMap=mainService.generateShortUrl(request.getParameter("url"));
+        Map<String,String> resultMap=mainService.generateShortUrl(data.getOriginalUrl());
 
         if(!resultMap.containsKey("status") || resultMap.get("status").equals("failed")){
             resultMap.put("status","failed");
