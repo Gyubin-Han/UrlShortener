@@ -23,7 +23,7 @@ public class MainService {
     private UrlMapRepository urlMapRepository;
 
     // HTTP(S) URL 검증 패턴식
-    private final String urlRegPattern="^((http|https):\\/\\/)?([a-z0-9-]{2,}\\.[a-z]{2,}|([0-9]{1,3}\\.){3}[0-9]{1,3})[\\w.\\/가-힣\\-\\ ?=&:]*";
+    private final String urlRegPattern="^((http|https):\\/\\/)?([a-z0-9-]{2,}\\.[a-z]{2,}|([0-9]{1,3}\\.){3}[0-9]{1,3})[\\w.\\/가-힣\\-\\ ?=&:%0-9A-Fa-f]*";
     // Base62 Encoder Instance 생성 및 호출
     private Base62 base62=Base62.createInstance();
 
