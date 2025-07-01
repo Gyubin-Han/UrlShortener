@@ -2,6 +2,7 @@ CREATE DATABASE `hangyub_url_shortener`;
 
 USE hangyub_url_shortener;
 
+DROP TABLE IF EXISTS click_stat;
 DROP TABLE IF EXISTS url_map;
 DROP TABLE IF EXISTS users;
 
@@ -27,3 +28,15 @@ CREATE TABLE `url_map`(
     PRIMARY KEY(url_map_id),
     FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
+
+CREATE TABLE `click_stat` (
+    `click_stat_id` BIGINT NOT NULL AUTO_INCREMENT,
+    `url_map_id` BIGINT NOT NULL,
+    `click_stat_clicked_at` DATETIME NOT NULL,
+    `click_stat_user_agent` VARCHAR(20) NOT NULL,
+    `click_stat_ip_addr` VARCHAR(30) NOT NULL,
+    PRIMARY KEY(click_stat_id),
+    FOREIGN KEY(url_map_id) REFERENCES url_map(url_map_id)
+);
+
+CREATE INDEX `click_stat_url_map_id` ON click_stat(url_map_id);
