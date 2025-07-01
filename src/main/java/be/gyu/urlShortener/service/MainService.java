@@ -13,6 +13,7 @@ import be.gyu.urlShortener.repository.UrlMapRepository;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.time.LocalDateTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,13 +28,15 @@ public class MainService {
     private ClickStatRepository clickStatRepository;
 
     // HTTP(S) URL 검증 패턴식
-    private final String urlRegPattern="^((http|https):\\/\\/)?([a-z0-9-]{2,}\\.[a-z]{2,}|([0-9]{1,3}\\.){3}[0-9]{1,3})[\\w.\\/가-힣\\-\\ ?=&:%0-9A-Fa-f]*";
+    private final Pattern urlPattern=Pattern.compile("^((http|https):\\/\\/)?([a-z0-9-]{2,}\\.[a-z]{2,}|([0-9]{1,3}\\.){3}[0-9]{1,3})[\\w.\\/가-힣\\-\\ ?=&:%0-9A-Fa-f]*");
+    // URL 앞에 Protocol 존재 여부 확인 패턴식
+    private final Pattern protocolPattern=Pattern.compile("^(http|https):\\/\\/");
     // Base62 Encoder Instance 생성 및 호출
     private Base62 base62=Base62.createInstance();
 
     // HTTP(S) URL 검증 메소드
     public boolean validOriginalUrl(String url){
-        return url.matches(urlRegPattern);
+        return urlPattern.matcher(url).matches();
     }
 
     // URL 단축 메소드
@@ -108,9 +111,21 @@ public class MainService {
             .clickStatIpAddr(ipAddr)
             .build();
         
+        // 접속한 클라이언트의 정보를 DB에 저장
         clickStatRepository.save(clickStat);
+        String originalUrl=clickStat.getUrlMap().getUrlMapOriginal();
 
-        return clickStat.getUrlMap().getUrlMapOriginal();
+        // 저장된 원본 URL에 Protocol이 있는지 확인
+        //     ㄴ 없으면, 원본 URL 값에 http 프로토콜을 추가
+        if(!protocolPattern.matcher(originalUrl).find()){
+            StringBuilder sb=new StringBuilder();
+            sb.append("http://");
+            sb.append(originalUrl);
+            originalUrl=sb.toString();
+        }
+
+        // 원본 URL을 반환
+        return originalUrl;
     }
 
     // 단축 URL 생성 메소드 (검증 및 생성)
