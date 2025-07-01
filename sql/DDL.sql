@@ -33,7 +33,7 @@ CREATE TABLE `click_stat` (
     `click_stat_id` BIGINT NOT NULL AUTO_INCREMENT,
     `url_map_id` BIGINT NOT NULL,
     `click_stat_clicked_at` DATETIME NOT NULL,
-    `click_stat_user_agent` VARCHAR(20) NOT NULL,
+    `click_stat_user_agent` VARCHAR(255) NOT NULL,
     `click_stat_ip_addr` VARCHAR(30) NOT NULL,
     PRIMARY KEY(click_stat_id),
     FOREIGN KEY(url_map_id) REFERENCES url_map(url_map_id)
