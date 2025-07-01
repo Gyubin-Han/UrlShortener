@@ -57,9 +57,13 @@ public class MainController {
      * @param response Re-Direct 응답 처리를 위한 매개변수
      */
     @GetMapping("/{shortUrl}")
-    public void getShortUrl(@PathVariable(name="shortUrl") String shortUrl, HttpServletResponse response){
+    public void getShortUrl(@PathVariable(name="shortUrl") String shortUrl, HttpServletRequest request, HttpServletResponse response){
+        // 접속 정보들 추출
+        String userAgent=request.getHeader("User-Agent");
+        String userIpAddr=request.getRemoteAddr();
+
         // 단축 URL을 통해, 원본 URL을 가져옴.
-        String originalUrl=mainService.getOriginalUrl(shortUrl);
+        String originalUrl=mainService.getOriginalUrl(shortUrl,userAgent,userIpAddr);
         // 가져온 원본 URL 값을 적잘한 URL이 될 수 있도록 Re-Direct하기 전에 URL-Encoding
         String encodeUrl=UriComponentsBuilder.fromUriString(originalUrl).build().encode().toUriString();
         // Re-Direct 상태 코드 설정

@@ -3,9 +3,11 @@ package be.gyu.urlShortener.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import be.gyu.urlShortener.entity.ClickStat;
 import be.gyu.urlShortener.entity.UrlMap;
 import be.gyu.urlShortener.exception.ShortUrlNotFoundException;
 import be.gyu.urlShortener.exception.UrlValidationFailedException;
+import be.gyu.urlShortener.repository.ClickStatRepository;
 import be.gyu.urlShortener.repository.UrlMapRepository;
 
 import java.util.HashMap;
@@ -21,6 +23,8 @@ import io.seruco.encoding.base62.Base62;
 public class MainService {
     @Autowired
     private UrlMapRepository urlMapRepository;
+    @Autowired
+    private ClickStatRepository clickStatRepository;
 
     // HTTP(S) URL 검증 패턴식
     private final String urlRegPattern="^((http|https):\\/\\/)?([a-z0-9-]{2,}\\.[a-z]{2,}|([0-9]{1,3}\\.){3}[0-9]{1,3})[\\w.\\/가-힣\\-\\ ?=&:%0-9A-Fa-f]*";
@@ -89,14 +93,24 @@ public class MainService {
     }
 
     // 단축 URL로 원본 URL 조회 및 반환 메소드
-    public String getOriginalUrl(String shortUrl){
+    public String getOriginalUrl(String shortUrl, String userAgent, String ipAddr){
         Optional<UrlMap> optional=urlMapRepository.findByUrlMapShort(shortUrl);
         
         if(!optional.isPresent()){
             throw new ShortUrlNotFoundException();
         }
 
-        return optional.get().getUrlMapOriginal();
+        // 접속 정보 저장을 위해서 새 엔티티 객체 생성
+        ClickStat clickStat=ClickStat.builder()
+            .clickStatClickedAt(LocalDateTime.now())
+            .urlMap(optional.get())
+            .clickStatUserAgent(userAgent)
+            .clickStatIpAddr(ipAddr)
+            .build();
+        
+        clickStatRepository.save(clickStat);
+
+        return clickStat.getUrlMap().getUrlMapOriginal();
     }
 
     // 단축 URL 생성 메소드 (검증 및 생성)
