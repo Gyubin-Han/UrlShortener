@@ -54,6 +54,7 @@ public class MainController {
     /**
      * 단축 URL 조회 및 원본 URL로 Re-Direct 처리 메소드
      * @param shortUrl 단축 URL
+     * @param request 사용자의 접속 정보
      * @param response Re-Direct 응답 처리를 위한 매개변수
      */
     @GetMapping("/{shortUrl}")
