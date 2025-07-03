@@ -27,22 +27,22 @@ public class MainService {
     @Autowired
     private ClickStatRepository clickStatRepository;
 
-    // HTTP(S) URL 검증 패턴식
-    private final Pattern urlPattern=Pattern.compile("^((http|https):\\/\\/)?([a-z0-9-]{2,}\\.[a-z]{2,}|([0-9]{1,3}\\.){3}[0-9]{1,3})[\\w.\\/가-힣\\-\\ ?=&:%0-9A-Fa-f]*");
-    // URL 앞에 Protocol 존재 여부 확인 패턴식
-    private final Pattern protocolPattern=Pattern.compile("^(http|https):\\/\\/");
     // Base62 Encoder Instance 생성 및 호출
-    private Base62 base62=Base62.createInstance();
+    private Base62 base62 = Base62.createInstance();
+    // MessageDigest Instance
+    private MessageDigest md;
 
     // HTTP(S) URL 검증 메소드
-    public boolean validOriginalUrl(String url){
-        return urlPattern.matcher(url).matches();
+    public boolean validOriginalUrl(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return false;
+        }
+        return UrlConfig.Patterns.URL_PATTERN.matcher(url).matches();
     }
 
     // URL 단축 메소드
     public UrlMap createUrlShort(String url){
-        // SHA-256 Hashing을 위해 Instance 생성 및 호출
-        MessageDigest md;
+        // 싱글톤으로 된 MessageDigest Instance 호출
         try{
             md=MessageDigest.getInstance("sha256");
         }catch(NoSuchAlgorithmException e){
@@ -58,7 +58,7 @@ public class MainService {
             .urlMapClick(0l)
             .urlMapCreatedAt(LocalDateTime.now())
             .urlMapUpdatedAt(LocalDateTime.now())
-            .urlMapExpiredAt(LocalDateTime.now().plusDays(14))
+            .urlMapExpiredAt(LocalDateTime.now().plusDays(UrlConfig.Expired.EXPIRED_DAYS))
             .build();
         
         // DB에 저장 - 초기 저장 (단축 URL은 빈 값으로 우선 저장)
@@ -79,8 +79,8 @@ public class MainService {
             sb.append(String.format("%c",b));
         }
 
-        // 해싱 및 인코딩된 문장을 7자리 추출하여 저장
-        String shortResult=sb.toString().substring(0,7);
+        // 해싱 및 인코딩된 문장을 설정된 길이만큼 추출하여 저장
+        String shortResult=sb.toString().substring(0, UrlConfig.ShortUrl.SHORT_URL_LENGTH);
         urlMap=urlMap.toBuilder()
             .urlMapShort(shortResult)
             .build();
@@ -116,12 +116,9 @@ public class MainService {
         String originalUrl=clickStat.getUrlMap().getUrlMapOriginal();
 
         // 저장된 원본 URL에 Protocol이 있는지 확인
-        //     ㄴ 없으면, 원본 URL 값에 http 프로토콜을 추가
-        if(!protocolPattern.matcher(originalUrl).find()){
-            StringBuilder sb=new StringBuilder();
-            sb.append("http://");
-            sb.append(originalUrl);
-            originalUrl=sb.toString();
+        //     ㄴ 없으면, 설정된 기본 프로토콜을 추가
+        if (!UrlConfig.Patterns.PROTOCOL_PATTERN.matcher(originalUrl).find()) {
+            originalUrl = UrlConfig.Patterns.DEFAULT_PROTOCOL + originalUrl;
         }
 
         // 원본 URL을 반환
